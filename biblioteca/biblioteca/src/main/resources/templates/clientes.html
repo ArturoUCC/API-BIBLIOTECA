@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca | Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --ink: #17324d; --aqua: #0c8d87; --paper: #f4f7f6; --accent: #e5a93f; }
+        body { background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+        .navbar { background: var(--ink); }
+        .brand-mark { color: var(--accent); font-weight: 700; letter-spacing: 1px; }
+        .page-header { border-bottom: 3px solid var(--accent); }
+        .panel { background: #fff; border: 1px solid #d9e1df; border-radius: 6px; box-shadow: 0 8px 20px rgb(23 50 77 / 8%); }
+        .table thead th { color: #fff; background: var(--ink); white-space: nowrap; }
+        .btn-primary { background: var(--aqua); border-color: var(--aqua); }
+        .btn-primary:hover { background: #08736e; border-color: #08736e; }
+        .form-control:focus, .form-select:focus { border-color: var(--aqua); box-shadow: 0 0 0 .2rem rgb(12 141 135 / 18%); }
+        @media (max-width: 767px) { .table { font-size: .86rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand brand-mark" th:href="@{/vista/libros}">BIBLIOTECA</a>
+            <div>
+                <a class="nav-link d-inline text-white-50" th:href="@{/vista/libros}">Libros</a>
+                <a class="nav-link d-inline text-white ms-3" th:href="@{/vista/clientes}">Clientes</a>
+                <a class="nav-link d-inline text-white-50 ms-3" th:href="@{/vista/prestamos}">Préstamos</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        <header class="page-header d-flex justify-content-between align-items-end mb-4 pb-3">
+            <div>
+                <p class="text-uppercase small mb-1 text-secondary">Administración</p>
+                <h1 class="h2 mb-0">Clientes</h1>
+            </div>
+            <span class="badge text-bg-light border" th:text="${#lists.size(clientes)} + ' registrados'">0 registrados</span>
+        </header>
+
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${mensaje}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Formulario de registro -->
+            <section class="col-lg-4">
+                <div class="panel p-4">
+                    <h2 class="h5 mb-3">Registrar cliente</h2>
+                    <form th:action="@{/vista/clientes/guardar}" th:object="${cliente}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="nombre">Nombre</label>
+                            <input id="nombre" class="form-control" th:field="*{nombre}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="apellidos">Apellidos</label>
+                            <input id="apellidos" class="form-control" th:field="*{apellidos}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="correoelectronico">Correo electrónico</label>
+                            <input id="correoelectronico" type="email" class="form-control" th:field="*{correoelectronico}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="contrasena">Contraseña</label>
+                            <input id="contrasena" type="password" class="form-control" th:field="*{contrasena}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="telefono">Teléfono</label>
+                            <input id="telefono" class="form-control" th:field="*{telefono}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="direccion">Dirección</label>
+                            <input id="direccion" class="form-control" th:field="*{direccion}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="fechanacimiento">Fecha de nacimiento</label>
+                            <input id="fechanacimiento" type="date" class="form-control" th:field="*{fechanacimiento}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="rol">Rol</label>
+                            <select id="rol" class="form-select" th:field="*{rol}" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="ADMIN">Administrador</option>
+                                <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" for="estado">Estado</label>
+                            <select id="estado" class="form-select" th:field="*{estado}" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="INACTIVO">Inactivo</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit">Guardar cliente</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Listado -->
+            <section class="col-lg-8">
+                <div class="panel p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0">Listado de clientes</h2>
+                        <input id="buscador" class="form-control form-control-sm w-auto" type="search" placeholder="Buscar nombre o correo">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tablaClientes">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Nombre</th><th>Apellidos</th><th>Correo</th><th>Teléfono</th><th>Rol</th><th>Estado</th><th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${clientes}">
+                                    <td th:text="${item.id}"></td>
+                                    <td th:text="${item.nombre}"></td>
+                                    <td th:text="${item.apellidos}"></td>
+                                    <td th:text="${item.correoelectronico}"></td>
+                                    <td th:text="${item.telefono}"></td>
+                                    <td th:text="${item.rol}"></td>
+                                    <td>
+                                        <span class="badge" th:classappend="${item.estado == 'ACTIVO'} ? 'text-bg-success' : 'text-bg-secondary'" th:text="${item.estado}"></span>
+                                    </td>
+                                    <td class="text-end text-nowrap">
+                                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" th:data-bs-target="'#editar-' + ${item.id}">Editar</button>
+                                        <form class="d-inline" th:action="@{/vista/clientes/{id}/eliminar(id=${item.id})}" method="post">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit" onclick="return confirm('¿Eliminar este cliente?')">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="8" class="text-center text-secondary py-4">No hay clientes registrados.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modales de edición (fuera de la tabla, uno por cliente) -->
+        <div th:each="item : ${clientes}" class="modal fade" th:id="'editar-' + ${item.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/vista/clientes/{id}/actualizar(id=${item.id})}" method="post">
+                        <div class="modal-header">
+                            <h3 class="modal-title fs-5">Editar cliente</h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3"><label class="form-label">Nombre</label><input class="form-control" name="nombre" th:value="${item.nombre}" required></div>
+                            <div class="mb-3"><label class="form-label">Apellidos</label><input class="form-control" name="apellidos" th:value="${item.apellidos}" required></div>
+                            <div class="mb-3"><label class="form-label">Correo electrónico</label><input class="form-control" type="email" name="correoelectronico" th:value="${item.correoelectronico}" required></div>
+                            <div class="mb-3"><label class="form-label">Contraseña</label><input class="form-control" type="password" name="contrasena" th:value="${item.contrasena}" required></div>
+                            <div class="mb-3"><label class="form-label">Teléfono</label><input class="form-control" name="telefono" th:value="${item.telefono}"></div>
+                            <div class="mb-3"><label class="form-label">Dirección</label><input class="form-control" name="direccion" th:value="${item.direccion}"></div>
+                            <div class="mb-3"><label class="form-label">Fecha de nacimiento</label><input class="form-control" type="date" name="fechanacimiento" th:value="${item.fechanacimiento}"></div>
+                            <div class="mb-3">
+                                <label class="form-label">Rol</label>
+                                <select class="form-select" name="rol" required>
+                                    <option value="ADMIN" th:selected="${item.rol == 'ADMIN'}">Administrador</option>
+                                    <option value="USUARIO" th:selected="${item.rol == 'USUARIO'}">Usuario</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" name="estado" required>
+                                    <option value="ACTIVO" th:selected="${item.estado == 'ACTIVO'}">Activo</option>
+                                    <option value="INACTIVO" th:selected="${item.estado == 'INACTIVO'}">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                            <button class="btn btn-primary" type="submit">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('buscador').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('#tablaClientes tbody tr').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
